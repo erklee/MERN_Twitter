@@ -3,6 +3,7 @@ const express = require("express");
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const debug = require('debug');
+const csurf = require('csurf');
 
 // ADD THESE TWO LINES
 const cors = require('cors');
@@ -11,7 +12,7 @@ const { isProduction } = require('./config/keys');
 // const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/api/users');
 const tweetsRouter = require('./routes/api/tweets');
-
+const csrfRouter = require('./routes/api/csrf');
 
 
 const app = express();
@@ -29,10 +30,25 @@ if (!isProduction) {
     app.use(cors());
 }
 
+
+// ...
+app.use(
+  csurf({
+    cookie: {
+      secure: isProduction,
+      sameSite: isProduction && "Lax",
+      httpOnly: true
+    }
+  })
+);
+
+
+
 // Attach Express routers
 // app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/tweets', tweetsRouter);
+app.use('/api/csrf', csrfRouter);
 
 // Express custom middleware for catching all unmatched requests and formatting
 // a 404 error to be sent as the response.
@@ -41,7 +57,7 @@ app.use((req, res, next) => {
     err.statusCode = 404;
     next(err);
   });
-  
+
   const serverErrorLogger = debug('backend:error');
   
   // Express custom error handler that will be called whenever a route handler or
