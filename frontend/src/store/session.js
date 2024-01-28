@@ -1,4 +1,4 @@
-import jwtFetch from "./jwt";
+import jwtFetch from './jwt';
 
 const RECEIVE_CURRENT_USER = "session/RECEIVE_CURRENT_USER";
 const RECEIVE_SESSION_ERRORS = "session/RECEIVE_SESSION_ERRORS";
@@ -45,27 +45,35 @@ const startSession = (userInfo, route) => async dispatch => {
       return dispatch(receiveErrors(res.errors));
     }
   }
-};
+};  
 
 export const logout = () => dispatch => {
-    localStorage.removeItem('jwtToken');
-    dispatch(logoutUser());
-  };
-
-  const initialState = {
-    user: undefined
-  };
-  
-  const sessionReducer = (state = initialState, action) => {
-    switch (action.type) {
-      case RECEIVE_CURRENT_USER:
-        return { user: action.currentUser };
-      case RECEIVE_USER_LOGOUT:
-        return initialState;
-      default:
-        return state;
-    }
+  localStorage.removeItem('jwtToken');
+  dispatch(logoutUser());
 };
+
+export const getCurrentUser = () => async dispatch => {
+  const res = await jwtFetch('/api/users/current');
+  const user = await res.json();
+  return dispatch(receiveCurrentUser(user));
+};
+
+const initialState = {
+  user: undefined
+};
+
+const sessionReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case RECEIVE_CURRENT_USER:
+      return { user: action.currentUser };
+    case RECEIVE_USER_LOGOUT:
+      return initialState;
+    default:
+      return state;
+  }
+};
+
+export default sessionReducer;
 
 const nullErrors = null;
 
@@ -80,7 +88,3 @@ export const sessionErrorsReducer = (state = nullErrors, action) => {
       return state;
   }
 };
-
-
-
-export default sessionReducer;
