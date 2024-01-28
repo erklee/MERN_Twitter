@@ -4,16 +4,20 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const debug = require('debug');
 const csurf = require('csurf');
+require('./models/User');
+require('./models/Tweet'); 
+require('./config/passport');
+const passport = require('passport'); 
+
 
 // ADD THESE TWO LINES
 const cors = require('cors');
 const { isProduction } = require('./config/keys');
 
 // const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/api/users');
 const tweetsRouter = require('./routes/api/tweets');
+const usersRouter = require('./routes/api/users');
 const csrfRouter = require('./routes/api/csrf');
-
 
 const app = express();
 
@@ -22,6 +26,9 @@ app.use(express.json()); // parse JSON request body
 app.use(express.urlencoded({ extended: false })); // parse urlencoded request body
 app.use(cookieParser()); // parse cookies as an object on req.cookies
 // app.use(express.static(path.join(__dirname, 'public'))); // serve the static files in the public folder
+app.use(passport.initialize());
+
+
 
 if (!isProduction) {
     // Enable CORS only in development because React will be on the React
